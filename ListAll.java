@@ -47,10 +47,10 @@ public class ListAll {
                 ListByDate.display( persons, outFile, true );
                 break;
             case 'f':
-                ( new ListByFamily() ).display( parser, outFile );
+                ListByFamily.display( parser, outFile );
                 break;
             case 'r':
-                ( new ListByRelation() ).display( parser, outFile );
+                ( new ListByRelation( parser ) ).display( outFile );
                 break;
             default:
                 System.err.println( "Unsupported format: " + format );

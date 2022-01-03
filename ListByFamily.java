@@ -4,15 +4,12 @@ import java.util.TreeMap;
 
 public class ListByFamily {
 
-    private String[][] _grid = null;
-    private int _lines = 0;
-
-    public void display( Parser parser, String outFile ) {
-        _grid = new String[parser.generations + 1][parser.persons.size()];
-        _lines = 0;
+    public static void display( Parser parser, String outFile ) {
+    	String[][] grid = new String[parser.generations + 1][parser.persons.size()];
+    	int lines = 0;
         for( int r = 0; r < parser.roots.size(); ++r ) {
-            if( _lines > 0 ) _lines += 2;
-            _fill( parser.roots.get( r ) );
+            if( lines > 0 ) lines += 2;
+            lines = _fill( grid, parser.roots.get( r ), lines );
         }
 
         Writer out = Utils.openOutputFile( outFile );
@@ -24,11 +21,11 @@ public class ListByFamily {
                 out.write( "<col width=160>" );
             }
             out.write( "\r\n" );
-            for( int i = 0; i <= _lines; ++i ) {
+            for( int i = 0; i <= lines; ++i ) {
                 out.write( "<tr>\r\n" );
                 for( int j = 1; j <= parser.generations; ++j ) {
                     out.write( "<td>" );
-                    if( _grid[j][i] != null ) out.write( "\r\n" + _grid[j][i] + "\r\n" );
+                    if( grid[j][i] != null ) out.write( "\r\n" + grid[j][i] + "\r\n" );
                     out.write( "</td>\r\n" );
                 }
                 out.write( "</tr>\r\n" );
@@ -40,18 +37,19 @@ public class ListByFamily {
         Utils.closeWriter( out );
     }
 
-    private void _fill( Person person ) {
+    private static int _fill( String[][] grid, Person person, int lines ) {
         String s = person.format( Person.fmtMultiLine | Person.fmtShowAdopted );
         for( Iterator<Person> i = person.partners.values().iterator(); i.hasNext(); ) {
             s += "\r\n<p>" + i.next().format( Person.fmtMultiLine );
         }
-        _grid[person.generation][_lines] = s;
+       grid[person.generation][lines] = s;
         boolean firstChild = true;
         for( Iterator<Person> i = person.children.values().iterator(); i.hasNext(); ) {
-            if( !firstChild ) ++_lines;
-            _fill( i.next() );
+            if( !firstChild ) ++lines;
+            lines = _fill( grid, i.next(), lines );
             firstChild = false;
         }
+        return lines;
     }
 
     public static void main( String args[] ) throws InterruptedException {
@@ -66,8 +64,7 @@ public class ListByFamily {
         TreeMap<Integer, Person> persons = parser.persons;
         System.out.println( "Total " + persons.size() + " persons." );
 
-        ListByFamily lister = new ListByFamily();
-        lister.display( parser, args[1] );
+        ListByFamily.display( parser, args[1] );
         System.exit( 0 );
     }
 }

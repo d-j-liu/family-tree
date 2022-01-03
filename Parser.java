@@ -73,7 +73,6 @@ public class Parser {
                 continue;
             }
             if( maxId < id ) maxId = id;
-            final Integer key = new Integer( id );
             Person person = new Person();
             person.id = id;
             person.name = tokens[field++];
@@ -109,6 +108,7 @@ public class Parser {
                 System.err.println( "Invalid relation for person " + id );
                 continue;
             }
+            final Integer key = Integer.valueOf( id );
             if( persons.containsKey( key ) ) {
                 System.err.println( "Duplicate person [" + id + "]: " + person.name );
                 continue;
@@ -142,7 +142,7 @@ public class Parser {
 
     public static boolean insertByBirthday( TreeMap<Integer, Person> list, Person person ) {
         for( int k = 0; k < dup; ++k ) {
-            final Integer key = new Integer( person.birth.solar * dup + k );
+            final Integer key = Integer.valueOf( person.birth.solar * dup + k );
             if( list.containsKey( key ) ) continue;
             list.put( key, person );
             return true;
@@ -158,31 +158,31 @@ public class Parser {
             final Person me = i.next();
             if( me.father < 0 || me.mother < 0 ) extLinks.add( me );
             if( me.spouse != 0 && me.father <= 0 && me.mother <= 0 ) {
-                final Integer sid = new Integer( me.spouse > 0 ? me.spouse : -me.spouse );
+                final Integer sid = Integer.valueOf( me.spouse > 0 ? me.spouse : -me.spouse );
                 final Person spouse = persons.get( sid );
                 if( spouse != null ) {
                     if( me.gender == 0 && spouse.gender != 0 ) me.gender = spouse.gender ^ 3;
                     int sortId = me.id;
                     if( spouse.spouse != me.id ) sortId += 10000;
                     if( me.spouse < 0 ) sortId += 10000;
-                    spouse.partners.put( new Integer( sortId ), me );
+                    spouse.partners.put( Integer.valueOf( sortId ), me );
                     me.partners.put( sid, spouse );
                 }
             }
-            final Person father = persons.get( new Integer( me.father ) );
+            final Person father = persons.get( Integer.valueOf( me.father ) );
             if( father != null ) {
                 insertByBirthday( father.children, me );
                 if( father.gender == Person.female ) System.err.println( "Gender error " + father.id );
                 father.gender = Person.male;
             }
-            final Person mother = persons.get( new Integer( me.mother ) );
+            final Person mother = persons.get( Integer.valueOf( me.mother ) );
             if( mother != null ) {
                 insertByBirthday( mother.children, me );
                 if( mother.gender == Person.male ) System.err.println( "Gender error " + mother.id );
                 mother.gender = Person.female;
             }
             if( ( me.father == 0 ) != ( me.mother == 0 ) ) System.err.println( "Person[" + me.id + "] has single parent" );
-            final Person sibling = persons.get( new Integer( me.sibling ) );
+            final Person sibling = persons.get( Integer.valueOf( me.sibling ) );
             if( sibling != null ) {
                 insertByBirthday( sibling.siblings, me );
                 insertByBirthday( me.siblings, sibling );
@@ -275,7 +275,7 @@ public class Parser {
         }
         System.err.println( "Maximum ID=" + max );
         for( int i = 1; i < max; ++i ) {
-            if( persons.get( new Integer( i ) ) == null ) System.err.println( "Gap: " + i );
+            if( persons.get( Integer.valueOf( i ) ) == null ) System.err.println( "Gap: " + i );
         }
         if( out == null ) {
             System.err.println( "Unable to open output file." );

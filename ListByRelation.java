@@ -1,14 +1,13 @@
 import java.io.Writer;
 import java.util.Iterator;
-import java.util.TreeMap;
 import java.util.HashSet;
 
 public class ListByRelation {
 
-    private TreeMap<Integer, Person> _persons = null;
+    private final Parser _parser;
     private HashSet<Person> _siblings = new HashSet<Person>();
 
-    private void _showPerson( Writer out, String type, Person person ) throws Exception {
+    private static void _showPerson( Writer out, String type, Person person ) throws Exception {
         out.write( "<tr><td>" + type + "</td><td>" );
         if( person.isNode ) out.write( "<a href=#" + person.id + '>' );
         out.write( person.format( Person.fmtShowAdopted ) );
@@ -17,7 +16,7 @@ public class ListByRelation {
     }
 
     private void _showPerson( Writer out, String type, int id ) throws Exception {
-        _showPerson( out, type, _persons.get( new Integer( id ) ) );
+        _showPerson( out, type, _parser.persons.get( Integer.valueOf( id ) ) );
     }
 
     private void _showFamily( Writer out, Person person, int spouseOf ) throws Exception {
@@ -68,15 +67,14 @@ public class ListByRelation {
         }
     }
 
-    public void display( Parser parser, String outFile ) {
-        final String title = "Family of " + parser.roots.firstElement().name + " by Relationship";
-        _persons = parser.persons;
+    public void display( String outFile ) {
+        final String title = "Family of " + _parser.roots.firstElement().name + " by Relationship";
         Writer out = Utils.openOutputFile( outFile );
         try {
             out.write( Utils.makeHttpHeader( title, false ) );
-            for( int r = 0; r < parser.roots.size(); ++r ) {
+            for( int r = 0; r < _parser.roots.size(); ++r ) {
                 _siblings.clear();
-                Person person = parser.roots.elementAt( r );
+                Person person = _parser.roots.elementAt( r );
                 person.isNode = true;
                 _showFamily( out, person, 0 );
                 for( Iterator<Person> itr = _siblings.iterator(); itr.hasNext(); ) {
@@ -90,6 +88,10 @@ public class ListByRelation {
         Utils.closeWriter( out );
     }
 
+    public ListByRelation( Parser parser ) {
+        _parser = parser;
+    }
+
     public static void main( String args[] ) throws InterruptedException {
         if( args.length < 2 ) {
             System.err.println( "Usage: ListByRelation person-list(UTF-8) output" );
@@ -99,11 +101,9 @@ public class ListByRelation {
         Parser parser = new Parser();
         if( !parser.parse( args[0] ) ) System.exit( 1 );
         parser.fill();
-        TreeMap<Integer, Person> persons = parser.persons;
-        System.out.println( "Total " + persons.size() + " persons." );
+        System.out.println( "Total " + parser.persons.size() + " persons." );
 
-        ListByRelation lister = new ListByRelation();
-        lister.display( parser, args[1] );
+        new ListByRelation( parser ).display( args[1] );
         System.exit( 0 );
     }
 }

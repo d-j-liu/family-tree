@@ -29,8 +29,8 @@ public class ListDescendents {
                 System.err.println( "Skip " + child.id + ": invalid date of birth." );
                 continue;
             }
-            if( !Parser.insertByBirthday( _sorted[child.generation], child ) )
-                System.err.println( "Skip " + child.id + ": date of birth full." );
+            if( Parser.insertByBirthday( _sorted[child.generation], child ) ) continue;
+            System.err.println( "Skip " + child.id + ": date of birth full." );
         }
     }
 
@@ -71,8 +71,7 @@ public class ListDescendents {
         TreeMap<Integer, Person> persons = parser.persons;
         System.out.println( "Total " + persons.size() + " persons." );
 
-        ListDescendents lister = new ListDescendents( parser );
-        lister.display( outFile );
+        new ListDescendents( parser ).display( outFile );
         System.exit( 0 );
     }
 }
